@@ -4,8 +4,8 @@ import lombok.Data;
 
 @Data
 public class ProductWrapper {
-    Integer id;
 
+    Integer id;
     String name;
     String description;
     Integer price;

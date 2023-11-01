@@ -28,7 +28,6 @@ public class UserRestImpl implements UserRest {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        //return new ResponseEntity<>("{\"message\":\"Something went wrong\"}", HttpStatus.INTERNAL_SERVER_ERROR);
         return CafeUtils.getResponseEntity(CafeConstants.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
 
     }
@@ -82,15 +81,12 @@ public class UserRestImpl implements UserRest {
     }
     @Override
     public ResponseEntity<String> changePassword(Map<String, String> requestMap) {
-//        try {
-//            userService.changePassword(requestMap);
-//        }catch (Exception ex){
-//            ex.printStackTrace();
-//        }
-//        return CafeUtils.getResponseEntity("Changed", HttpStatus.INTERNAL_SERVER_ERROR);
-//
-//    }
-        return userService.changePassword(requestMap);
+        try {
+            userService.changePassword(requestMap);
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+        return CafeUtils.getResponseEntity("Changed", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @Override

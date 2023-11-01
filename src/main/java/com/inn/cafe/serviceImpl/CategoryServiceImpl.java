@@ -28,6 +28,12 @@ public class CategoryServiceImpl implements CategoryService {
     @Autowired
     JwtFilter jwtFilter;
 
+    /**
+     * Adds a new category to the system.
+     *
+     * @param requestMap A Map containing request data with the "name" of the category to be added.
+     * @return A ResponseEntity with a success message if the category is added successfully, or an error response otherwise.
+     */
     @Override
     public ResponseEntity<String> addNewCategory(Map<String, String> requestMap) {
         try {
@@ -39,13 +45,19 @@ public class CategoryServiceImpl implements CategoryService {
             } else {
                 return CafeUtils.getResponseEntity(CafeConstants.UNAUTHORIZED_ACCESS, HttpStatus.UNAUTHORIZED);
             }
-
         } catch (Exception ex) {
             ex.printStackTrace();
         }
         return CafeUtils.getResponseEntity(CafeConstants.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    /**
+     * Validates category data in the requestMap.
+     *
+     * @param requestMap A Map containing request data.
+     * @param validateId A boolean indicating whether to validate the "id" field.
+     * @return true if the requestMap contains valid data, false otherwise.
+     */
     private boolean validateCategory(Map<String, String> requestMap, boolean validateId) {
         if (requestMap.containsKey("name")) {
             if (requestMap.containsKey("id") && validateId) {
@@ -57,6 +69,13 @@ public class CategoryServiceImpl implements CategoryService {
         return false;
     }
 
+    /**
+     * Converts data from a requestMap into a Category object.
+     *
+     * @param requestMap A Map containing request data.
+     * @param isAdd A boolean indicating whether this is for adding a new category.
+     * @return A Category object created from the request data.
+     */
     private Category getCategoryFromMap(Map<String, String> requestMap, boolean isAdd) {
         Category category = new Category();
         if (isAdd) {
@@ -66,6 +85,12 @@ public class CategoryServiceImpl implements CategoryService {
         return category;
     }
 
+    /**
+     * Retrieves a list of all categories.
+     *
+     * @param filterValue A filter value to determine which categories to retrieve.
+     * @return A ResponseEntity with a list of Category objects if successful, or an error response otherwise.
+     */
     @Override
     public ResponseEntity<List<Category>> getAllCategory(String filterValue) {
         try {
@@ -80,7 +105,12 @@ public class CategoryServiceImpl implements CategoryService {
         return new ResponseEntity<List<Category>>(new ArrayList<>(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    //Method for update Category
+    /**
+     * Updates an existing category in the system.
+     *
+     * @param requestMap A Map containing request data with the "id" and "name" of the category to be updated.
+     * @return A ResponseEntity with a success message if the category is updated successfully, or an error response otherwise.
+     */
     public ResponseEntity<String> updateCategory(Map<String, String> requestMap) {
         try {
             if (jwtFilter.isAdmin()) {
@@ -88,7 +118,7 @@ public class CategoryServiceImpl implements CategoryService {
                     Optional optional = categoryDao.findById(Integer.parseInt(requestMap.get("id")));
                     if (!optional.isEmpty()) {
                         categoryDao.save(getCategoryFromMap(requestMap, true));
-                        return CafeUtils.getResponseEntity("Category Updated SuccessFuly", HttpStatus.OK);
+                        return CafeUtils.getResponseEntity("Category Updated Successfully", HttpStatus.OK);
                     } else {
                         return CafeUtils.getResponseEntity("Category Id not found", HttpStatus.OK);
                     }
@@ -103,6 +133,4 @@ public class CategoryServiceImpl implements CategoryService {
         }
         return CafeUtils.getResponseEntity(CafeConstants.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
     }
-
-
 }

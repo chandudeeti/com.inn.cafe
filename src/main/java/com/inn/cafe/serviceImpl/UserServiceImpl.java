@@ -44,6 +44,12 @@ public class UserServiceImpl implements UserService {
     @Autowired
     EmailUtils emailUtils;
 
+    /**
+     * Registers a new user with the provided information.
+     *
+     * @param requestMap A map containing user registration details such as name, contact number, email, and password.
+     * @return A ResponseEntity indicating the success or failure of the registration.
+     */
     @Override
     public ResponseEntity<String> signUp(Map<String, String> requestMap) {
         log.info("Inside signup {}", requestMap);
@@ -65,6 +71,12 @@ public class UserServiceImpl implements UserService {
         return CafeUtils.getResponseEntity(CafeConstants.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    /**
+     * Logs in a user with the provided email and password.
+     *
+     * @param requestMap A map containing user login details such as email and password.
+     * @return A ResponseEntity containing an authentication token or an error message.
+     */
     @Override
     public ResponseEntity<String> login(Map<String, String> requestMap) {
         log.info("Inside login {}");
@@ -92,6 +104,11 @@ public class UserServiceImpl implements UserService {
         return new ResponseEntity<String>("{\"message\":\"" + "Bad credentials." + "\"}", HttpStatus.BAD_REQUEST);
     }
 
+    /**
+     * Retrieves a list of all users.
+     *
+     * @return A ResponseEntity containing a list of UserWrapper objects or an error response if an exception occurs.
+     */
     @Override
     public ResponseEntity<List<UserWrapper>> getAllUsers() {
         try {
@@ -107,27 +124,12 @@ public class UserServiceImpl implements UserService {
         return new ResponseEntity<>(new ArrayList<>(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    /*@Override
-    public ResponseEntity<String> update(Map<String, String> requestMap) {
-        try {
-            if(jwtFilter.isAdmin()) {
-             Optional<User> optionalUser = userDao.findById(Integer.parseInt(requestMap.get("id")));
-                if (optionalUser.isPresent()) {
-                    userDao.updateStatus(requestMap.get("status"), Integer.parseInt(requestMap.get("id")));
-                    return CafeUtils.getResponseEntity("User Status Updated Successfully", HttpStatus.OK);
-                } else {
-                    return CafeUtils.getResponseEntity("User Id Doesn't exist", HttpStatus.OK);
-                }
-            }else {
-                return CafeUtils.getResponseEntity(CafeConstants.UNAUTHORIZED_ACCESS, HttpStatus.UNAUTHORIZED);
-            }
-        }catch (Exception ex){
-            ex.printStackTrace();
-        }
-       return CafeUtils.getResponseEntity(CafeConstants.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
-
-    }*/
-
+    /**
+     * Updates the status of a user (e.g., approve or reject).
+     *
+     * @param requestMap A map containing user ID and new status.
+     * @return A ResponseEntity indicating the success or failure of the status update operation.
+     */
     @Override
     public ResponseEntity<String> update(Map<String, String> requestMap) {
         try {
@@ -140,7 +142,7 @@ public class UserServiceImpl implements UserService {
                     return CafeUtils.getResponseEntity("User Status Updated Successfully", HttpStatus.OK);
                 } else {
                     log.info("user id not found");
-                    return CafeUtils.getResponseEntity("User Id doesn't exists", HttpStatus.OK);
+                    return CafeUtils.getResponseEntity("User Id doesn't exist", HttpStatus.OK);
                 }
 
             } else {
@@ -153,7 +155,13 @@ public class UserServiceImpl implements UserService {
         return CafeUtils.getResponseEntity(CafeConstants.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    //sending mail to all admins
+    /**
+     * Sends email notifications to all administrators based on the user status change.
+     *
+     * @param status    The status of the user (e.g., "true" for approved, "false" for rejected).
+     * @param user      The email address of the user whose status is being updated.
+     * @param allAdmin  A list of email addresses of all administrators.
+     */
     private void sendMailToAllAdmin(String status, String user, List<String> allAdmin) {
         allAdmin.remove(jwtFilter.getCurrentUser());
         if (status != null && status.equalsIgnoreCase("true")) {
@@ -163,7 +171,12 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-
+    /**
+     * Validates the user registration details in the request map.
+     *
+     * @param requestMap A map containing user registration details.
+     * @return `true` if the request map is valid, `false` otherwise.
+     */
     private boolean validateSignUpMap(Map<String, String> requestMap) {
         if (requestMap.containsKey("name") && requestMap.containsKey("contactNumber")
                 && requestMap.containsKey("email") && requestMap.containsKey("password")) {
@@ -173,6 +186,12 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    /**
+     * Creates a User object from the provided request map.
+     *
+     * @param requestMap A map containing user details.
+     * @return A User object created from the request map.
+     */
     private User getUserFormMap(Map<String, String> requestMap) {
         User user = new User();
         user.setName(requestMap.get("name"));
@@ -184,16 +203,27 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
+    /**
+     * Checks the validity of a token.
+     *
+     * @return A ResponseEntity with a `true` value if the token is valid, or an error response if it's not.
+     */
     @Override
     public ResponseEntity<String> checkToken() {
         return CafeUtils.getResponseEntity("true", HttpStatus.OK);
     }
 
+    /**
+     * Changes the password for the currently authenticated user.
+     *
+     * @param requestMap A map containing the old and new passwords.
+     * @return A ResponseEntity indicating the success or failure of the password change operation.
+     */
     @Override
     public ResponseEntity<String> changePassword(Map<String, String> requestMap) {
         try {
             User userObj = userDao.findByEmail(jwtFilter.getCurrentUser());
-            if (!userObj.equals(null)) {
+            if (!Objects.isNull(userObj)) {
                 if (userObj.getPassword().equals(requestMap.get("oldPassword"))) {
                     userObj.setPassword(requestMap.get("newPassword"));
                     userDao.save(userObj);
@@ -209,6 +239,12 @@ public class UserServiceImpl implements UserService {
         return CafeUtils.getResponseEntity(CafeConstants.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    /**
+     * Sends an email with the user's credentials to the specified email address.
+     *
+     * @param requestMap A map containing the user's email.
+     * @return A ResponseEntity indicating the success or failure of the email operation.
+     */
     @Override
     public ResponseEntity<String> forgotPassword(Map<String, String> requestMap) {
         try {
@@ -221,5 +257,4 @@ public class UserServiceImpl implements UserService {
         }
         return CafeUtils.getResponseEntity(CafeConstants.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
     }
-
 }

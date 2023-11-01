@@ -24,12 +24,17 @@ public class DashboardServiceImpl implements DashboardService {
     @Autowired
     BillDao billDao;
 
+    /**
+     * Retrieves and returns the count of categories, products, and bills as a map.
+     *
+     * @return A ResponseEntity containing a map with counts for categories, products, and bills, or an error response if an exception occurs.
+     */
     @Override
     public ResponseEntity<Map<String, Object>> getCount() {
-        Map<String,Object> map = new HashMap<>();
-        map.put("category",categoryDao.count());
-        map.put("product",productDao.count());
-        map.put("bill",billDao.count());
+        Map<String, Object> map = new HashMap<>();
+        map.put("category", categoryDao.count());
+        map.put("product", productDao.count());
+        map.put("bill", billDao.count());
 
         return new ResponseEntity<>(map, HttpStatus.OK);
     }

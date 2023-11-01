@@ -39,6 +39,14 @@ public class BillServiceImpl implements BillService {
     @Autowired
     BillDao billDao;
 
+    /**
+     * Generates a PDF report based on the provided request data and saves it to a file.
+     *
+     * @param requestMap A Map containing request data, including "name," "contactNumber," "email," "paymentMethod," "productDetails," "totalAmount," and optionally "uuid" and "isGenerate."
+     * @return A ResponseEntity with a success message and the generated PDF's UUID if the report is generated and saved successfully,
+     *         a BAD_REQUEST response if the request data is incomplete or invalid,
+     *         or an error response if an exception occurs during the process.
+     */
     @Override
     public ResponseEntity<String> generateReport(Map<String, Object> requestMap) {
         log.info("Inside GenerateReport{}");
@@ -55,8 +63,8 @@ public class BillServiceImpl implements BillService {
                     requestMap.put("uuid", fileName);
                     insertBill(requestMap);
                 }
-                String data = "Name :" + requestMap.get("name") + "\n" + "Contact Number" + requestMap.get("contactNumber") +
-                        "\n" + "Email :" + requestMap.get("email") + "\n" + "Payment Method" + requestMap.get("paymentMethod");
+                String data = "Name :" + requestMap.get("name") + "\n" + "Contact Number :" + requestMap.get("contactNumber") +
+                        "\n" + "Email :" + requestMap.get("email") + "\n" + "Payment Method :" + requestMap.get("paymentMethod");
 
                 Document document = new Document();
                 log.info("Pdf Name--- : " + fileName);
@@ -100,6 +108,12 @@ public class BillServiceImpl implements BillService {
     }
 
 
+    /**
+     * Adds a row of data to a PdfPTable in a PDF document.
+     *
+     * @param table The PdfPTable to which the data row will be added.
+     * @param data A Map containing data to be added to the row, including "name," "category," "quantity," "price," and "total."
+     */
     private void addRows(PdfPTable table, Map<String, Object> data) {
         log.info("Inside addRows");
         table.addCell((String) data.get("name"));
@@ -109,6 +123,11 @@ public class BillServiceImpl implements BillService {
         table.addCell(Double.toString((Double) data.get("total")));
     }
 
+    /**
+     * Adds a header row to a PdfPTable in a PDF document.
+     *
+     * @param table The PdfPTable to which the header row will be added.
+     */
     private void addTableHeader(PdfPTable table) {
 
         log.info("Inside addTableHeader{}");
@@ -127,6 +146,12 @@ public class BillServiceImpl implements BillService {
 
     }
 
+    /**
+     * Retrieves a Font based on the specified font type.
+     *
+     * @param type A string indicating the desired font type, which can be "Header" or "Data."
+     * @return A Font object with the specified font style and size, or a default Font if the type is not recognized.
+     */
     private Font getFont(String type) {
         log.info("Inside getFont{}");
         switch (type) {
@@ -144,6 +169,12 @@ public class BillServiceImpl implements BillService {
 
     }
 
+    /**
+     * Sets a rectangular border in the PDF document.
+     *
+     * @param document The PDF document to which the rectangular border will be added.
+     * @throws DocumentException if there is an issue while setting the rectangular border.
+     */
     private void setRectangularInPdf(Document document) throws DocumentException {
         log.info("set setRectangularInPdf");
         Rectangle rectangle = new Rectangle(577, 825, 18, 15);
@@ -157,12 +188,30 @@ public class BillServiceImpl implements BillService {
 
     }
 
+    /**
+     * Validates a request map to ensure it contains the required fields for processing.
+     *
+     * @param requestMap A Map containing request data with the following keys:
+     *                  - "name" (Name of the customer)
+     *                  - "contactNumber" (Contact number of the customer)
+     *                  - "email" (Email address of the customer)
+     *                  - "paymentMethod" (Payment method used)
+     *                  - "productDetails" (Details of products ordered)
+     *                  - "totalAmount" (Total amount of the bill)
+     * @return true if the requestMap contains all the required keys, false otherwise.
+     */
     private boolean validateRequestMap(Map<String, Object> requestMap) {
         return requestMap.containsKey("name") && requestMap.containsKey("contactNumber")
                 && requestMap.containsKey("email") && requestMap.containsKey("paymentMethod")
                 && requestMap.containsKey("productDetails") && requestMap.containsKey("totalAmount");
     }
 
+    /**
+     * Inserts a new bill record into the database based on the provided request data.
+     *
+     * @param requestMap A Map containing request data, including "uuid," "name," "email," "contactNumber," "paymentMethod," "totalAmount," and "productDetails."
+     * @throws Exception if an error occurs during the insertion process.
+     */
     private void insertBill(Map<String, Object> requestMap) {
         try {
             Bill bill = new Bill();
@@ -180,6 +229,12 @@ public class BillServiceImpl implements BillService {
         }
     }
 
+    /**
+     * Retrieves a list of bills based on the user's role (admin or non-admin).
+     *
+     * @return A ResponseEntity containing a list of Bill objects if the user is an admin,
+     *         or a list of bills associated with the current user if not an admin.
+     */
     @Override
     public ResponseEntity<List<Bill>> getBills() {
         List<Bill> list = new ArrayList<>();
@@ -191,6 +246,14 @@ public class BillServiceImpl implements BillService {
         return new ResponseEntity<>(list, HttpStatus.OK);
     }
 
+    /**
+     * Retrieves a PDF file based on a UUID or generates it if it doesn't exist.
+     *
+     * @param requestMap A Map containing request data, including the "uuid" for the PDF.
+     * @return A ResponseEntity with the PDF file's content if found or generated successfully,
+     *         a BAD_REQUEST response if the UUID is missing or the requestMap is not valid,
+     *         or an error response if an exception occurs during the process.
+     */
     @Override
     public ResponseEntity<byte[]> getPdf(Map<String, Object> requestMap) {
         log.info("Inside getPdf : requestMap{}" + requestMap);
@@ -217,20 +280,27 @@ public class BillServiceImpl implements BillService {
         return null;
     }
 
-    /*private byte[] getByteArray(String filePath) throws Exception {
-        File initialFile = new File(filePath);
-        InputStream targetStream = new FileInputStream(initialFile);
-        byte[] byteArray = IOUtils.toByteArray(targetStream);
-        targetStream.close();
-        return byteArray;
-    }*/
 
+    /**
+     * Reads the contents of a file and returns it as a byte array.
+     *
+     * @param filePath The path to the file to be read.
+     * @return A byte array containing the file's content.
+     * @throws Exception if there are any errors during file reading.
+     */
     private byte[] getByteArray(String filePath) throws Exception {
         Path path = Paths.get(filePath);
         return Files.readAllBytes(path);
     }
 
-
+    /**
+     * Deletes a bill by its unique identifier (ID).
+     *
+     * @param id The ID of the bill to be deleted.
+     * @return A ResponseEntity with a success message if the bill is deleted successfully,
+     *         a message indicating that the bill ID doesn't exist, or an error message if
+     *         an exception occurs during the process.
+     */
     @Override
     public ResponseEntity<String> deleteBill(Integer id) {
         try {

@@ -7,6 +7,11 @@ import java.util.List;
 
 public interface CategoryDao extends JpaRepository<Category, Integer> {
 
+    /**
+     * Retrieves a list of all categories.
+     *
+     * @return A list of all category objects.
+     */
     List<Category> getAllCategory();
 
 }

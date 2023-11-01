@@ -15,26 +15,41 @@ import java.util.Objects;
 @Slf4j
 @Service
 public class CustomerUsersDetailsService implements UserDetailsService {
+
     @Autowired
     UserDao userDao;
 
     private User userDetails;
 
+    /**
+     * Load user details by username. This method is part of the UserDetailsService interface.
+     *
+     * @param username The username of the user to load.
+     * @return UserDetails for the specified user, or throw UsernameNotFoundException if the user is not found.
+     */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
         log.info("Inside loadUserByUsername {}", username);
         userDetails = userDao.findByEmailId(username);
-        if (!Objects.isNull(username))
-            return new org.springframework.security.core.userdetails.User(userDetails.getEmail(),
-                    userDetails.getPassword(), new ArrayList<>());
-        else
+
+        if (!Objects.isNull(username)) {
+            return new org.springframework.security.core.userdetails.User(
+                    userDetails.getEmail(),
+                    userDetails.getPassword(),
+                    new ArrayList<>()
+            );
+        } else {
             throw new UsernameNotFoundException("User not found....!");
+        }
     }
 
+    /**
+     * Get the user details associated with the loaded user.
+     *
+     * @return The User object representing the loaded user.
+     */
     public User getUserDetails() {
-
         return userDetails;
     }
-
 }

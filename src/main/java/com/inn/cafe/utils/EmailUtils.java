@@ -16,19 +16,32 @@ public class EmailUtils {
     @Autowired
     private JavaMailSender mailSender;
 
-    //To send an email
+    /**
+     * Send a simple email message.
+     *
+     * @param to      The recipient's email address.
+     * @param subject The email subject.
+     * @param text    The email message text.
+     * @param list    A list of email addresses to include as CC recipients.
+     */
     public void sendSimpleMessage(String to, String subject, String text, List<String> list) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom("nanipatel112@gmail.com");
         message.setTo(to);
         message.setSubject(subject);
         message.setText(text);
-        if (list != null && list.size() > 0)
+        if (list != null && list.size() > 0) {
             message.setCc(getCcArray(list));
+        }
         mailSender.send(message);
     }
 
-    //Converting List into array to set the message Cc
+    /**
+     * Get an array of email addresses from a list.
+     *
+     * @param ccList A list of email addresses.
+     * @return An array of email addresses.
+     */
     private String[] getCcArray(List<String> ccList) {
         String[] cc = new String[ccList.size()];
         for (int i = 0; i < ccList.size(); i++) {
@@ -37,15 +50,22 @@ public class EmailUtils {
         return cc;
     }
 
-    public void forgotMail(String to, String subject, String password) throws MessagingException{
+    /**
+     * Send a MIME email message for password recovery.
+     *
+     * @param to      The recipient's email address.
+     * @param subject The email subject.
+     * @param password The password to include in the email.
+     * @throws MessagingException if there is an issue with creating or sending the email.
+     */
+    public void forgotMail(String to, String subject, String password) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper messageHelper = new MimeMessageHelper(message,true);
+        MimeMessageHelper messageHelper = new MimeMessageHelper(message, true);
         messageHelper.setFrom("nanipatel112@gmail.com");
         messageHelper.setTo(to);
         messageHelper.setSubject(subject);
         String htmlMsg = "<p><b>Your Login details for Cafe Management System</b><br><b>Email: </b> " + to + " <br><b>Password: </b> " + password + "<br><a href=\"http://localhost:4200/\">Click here to login</a></p>";
-        message.setContent(htmlMsg,"text/html");
+        message.setContent(htmlMsg, "text/html");
         mailSender.send(message);
     }
-
 }

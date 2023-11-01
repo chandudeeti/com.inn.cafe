@@ -26,18 +26,34 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     JwtFilter jwtFilter;
 
+    /**
+     * Configure the password encoder for user authentication.
+     *
+     * @return An instance of the password encoder.
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
-
-        return NoOpPasswordEncoder.getInstance();
+        return NoOpPasswordEncoder.getInstance(); // Note: NoOpPasswordEncoder is used here for simplicity; consider using a more secure password encoder in production.
     }
 
+    /**
+     * Define an authentication manager bean.
+     *
+     * @return An authentication manager bean.
+     * @throws Exception If an exception occurs during configuration.
+     */
     @Bean(name = BeanIds.AUTHENTICATION_MANAGER)
     @Override
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();
     }
 
+    /**
+     * Configure HTTP security settings.
+     *
+     * @param http The HttpSecurity object to configure.
+     * @throws Exception If an exception occurs during configuration.
+     */
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.cors().configurationSource(request -> new CorsConfiguration().applyPermitDefaultValues())
@@ -45,9 +61,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
                 .authorizeRequests()
                 .antMatchers("/user/login", "/user/signup", "/user/forgotPassword")
-                .permitAll()
+                .permitAll() // Allow unauthenticated access to these endpoints
                 .anyRequest()
-                .authenticated()
+                .authenticated() // Require authentication for all other endpoints
                 .and()
                 .exceptionHandling()
                 .and()
@@ -57,6 +73,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
     }
 
+    /**
+     * Configure the authentication manager builder.
+     *
+     * @param auth The AuthenticationManagerBuilder to configure.
+     * @throws Exception If an exception occurs during configuration.
+     */
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(customerUsersDetailsService);
